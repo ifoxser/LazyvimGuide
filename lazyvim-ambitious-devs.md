@@ -703,7 +703,7 @@ Neovim 会保存所有跳转的历史记录，所以你可以在多个位置之�
 
 在下一章中，我们将学习更多关于打开文件和导航文件系统的内容。
 
-# [第四章 打开文件](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-4/#_opening_files)
+# [第四章：打开文件](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-4/#_opening_files)
 
 在上一章学习命令模式时，我们顺便了解了使用传统 Vim 方式（即 :edit 命令）来打开文件。另一个传统方法是直接在终端命令行中使用 nvim filename 来打开文件。
 
@@ -957,7 +957,7 @@ mini.files 菜单不是以侧边栏的形式显示，而是以并排的窗口列
 
 作为学习这些文件系统工具的副作用，我们还简单预览了如何配置插件和安装 LazyVim extras。我们将在下一章中更详细地讨论这些内容。
 
-# [第五章 配置与插件基础](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-5/#_configuration_and_plugin_basics)
+# [第五章：配置与插件基础](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-5/#_configuration_and_plugin_basics)
 
 在第一章中，我已经多次提到了插件，你也见识过了 Lazy.nvim 插件管理器的实际运用。LazyVim 采用了一种独特的多层级插件管理方式，虽然需要一些解释，但在实际使用中非常优雅。
 
@@ -1310,7 +1310,7 @@ return {
 
 在下一章，我们将介绍一些基本的编辑功能，这些功能模糊了"导航"和"插入文本"之间的界限。
 
-# [第六章 基础编辑](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-6/#_basic_editing)
+# [第六章：基础编辑](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-6/#_basic_editing)
 
 通过前面学习的导航快捷键，以及能够随心所欲地进入和退出插入模式，你在 Vim 中的编辑体验已经接近于传统非模态编辑器的水平了。
 
@@ -2206,7 +2206,7 @@ LazyVim 还创建了一些有用的键位绑定来改进文本粘贴，特别是
 
 在下一章中，我们将学习处理多个打开文件的各种方法，以及如何通过折叠来显示和隐藏代码。
 
-# [第9章 缓冲区和布局](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-9/#_buffers_and_layouts)
+# [第9章：缓冲区和布局](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-9/#_buffers_and_layouts)
 
 无论你使用什么编程语言，同时处理多个文件都是不可避免的。而且经常需要在同一个文件的不同区域之间切换。
 
@@ -2623,6 +2623,435 @@ Vim 的代码折叠系统几乎过于健壮，可能是因为它多年来经历�
 我们还介绍了代码折叠，用来更容易的处理大文件，还了解了会话管理，用来保存你的窗口配置并在之后回到它。当与 LazyVim 闪电般的启动时间结合时，这特别有用。当你不在编辑代码时，没有理由让你的代码编辑器保持打开消耗内存。
 
 在下一章中，我们将深入研究 LazyVim 提供的一些出色的编程语言支持。这可以说是让 VS Code 变得惊人的一件事，但 Vim 社区已经从竞争对手那里学习，并最终超越了他们。
+
+# [第10章：编程语言支持](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_programming_language_support)
+
+Visual Studio Code 首创了语言服务器这个概念，随后其他文本编辑器也纷纷效仿。早期在 Vim 中使用语言服务器协议时，体验很差而且很笨重，需要安装一些容易出问题且配置复杂的插件。
+
+后来，Neovim 决定直接在编辑器中内置语言服务器支持。虽然 Neovim 的内置支持还是不够完善，但随着时间推移，出现了一些稳定且简单的插件，让语言服务器的使用变得几乎自动化。LazyVim 就是这个进化过程的巅峰之作。
+
+除此之外，Neovim 还内置了 TreeSitter 支持。TreeSitter 是一个强大的库，它可以在你编辑代码时实时解析并识别代码的语法树。LazyVim 已经配置好了所有需要的插件，让 TreeSitter 可以开箱即用。
+
+语言服务器协议（LSP）为我们提供了很多功能，比如代码导航、函数提示、自动补全、特定的高亮和格式化功能、代码诊断等等。而 TreeSitter 则提供了更好的语法高亮、代码折叠，以及像你已经知道的 S 命令那样的基于语法的导航功能。
+
+在 LazyVim 中，主要有两个工具用来处理语言服务器：各种语言的 Lazy Extras（懒加载扩展）和 Mason.nvim 插件。接下来我们会了解这两个工具，然后学习如何更好地使用它们提供的功能。
+
+## [10.1 lang.* Lazy Extras](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_the_lang_lazy_extras)
+
+我们之前已经用过 LazyVim extras 来配置插件，我也建议你安装你经常使用的编程语言对应的 extras。这些 extras 包含了预配置的插件，为常用的编程语言提供最好的支持。大多数 extras 都预装了语言服务器，很多还包含了一些对特定语言很有用的 Neovim 插件。
+
+安装这些 extras 后，通常就能直接使用，而且你不需要学习新的快捷键。不过，建议你还是看一下这些 extras 安装的插件的说明文档（可以在 LazyVim 网站上查看 Extra 的文档，点击标题即可），以免错过某些语言特有的功能。比如，Python extra 自带了 venv-selector.nvim 插件，可以自动或手动激活各种 Python 虚拟环境。LazyVim 设置了快捷键 <Space>cv 来打开虚拟环境选择器，这里的 <Space>c 是"Code"子模式。
+
+## [10.2. Mason.nvim](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_mason_nvim)
+
+Lazy Extras 可能不会安装你需要的所有工具。比如说，我就更喜欢用一个叫 Biome 的新型高速工具，而不是默认的 TypeScript 格式化和代码检查工具。
+
+要安装这类工具，你可以使用 LazyVim 预装的 Mason.nvim 插件。用 <Space>cm 快捷键可以打开 Mason。弹出的窗口看起来和 Lazy.nvim 还有 Lazy Extras 的浮动窗口差不多，不过它的快捷键设置有点特别。
+
+Mason 其实是一个很大的数据库，里面有各种编程语言支持工具，包括语言服务器、格式化工具和代码检查工具，以及它们的安装说明。
+
+Mason.nvim 需要你的系统已经安装了一些基础工具。比如说，如果你要安装基于 Rust 的工具，你得先装好 cargo；如果要装需要 Python 支持的工具，就得先有 Python 和 pip。一般来说，如果你在用某种编程语言，你应该已经装好了 Mason 需要的工具。Mason 主要负责把这些工具安装到 Neovim 插件能找到的地方。
+
+使用 Mason 最难的部分是知道你想安装什么工具。比如我，因为之前就在用 Biome，所以我知道需要为它安装编辑器支持。这很简单，在 Mason 的列表里找到 biome 就行了（和其他窗口一样，可以滚动、搜索，而且 Mason 把所有东西按字母顺序排列了）。
+
+但当我开始写这本书的时候，我需要一个高级的 Markdown 格式化工具，可是我不知道该用哪个。我可以在窗口里搜索 markdown，然后按回车查看匹配项的描述和其他信息，但最后还是得用浏览器查资料，试了好几次才找到适合我的工具。
+
+我没法告诉你哪个工具最适合你，但一旦你在 Mason 里找到了想要的工具，按 i 键就能安装光标所在位置的包。在 Mason 中你经常用到的另一个命令是 Shift-U，用来更新所有已安装的工具。其他命令可以按 g? 查看。
+
+## [10.3 检查安装是否正确](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_validating_things_installed_cleanly)
+
+不管你用什么编辑器，配置语言服务器、代码检查和格式化工具都会很容易出问题。虽然 LazyExtras 和 Mason 在安装这些工具时都做得不错，但我们还是需要知道如何检查它们是否正常工作。
+
+首先说说通知功能。你应该已经看到过右上角会弹出一些通知，比如插件更新的提示。这些通知几秒钟就会消失。但有时候，我们需要重新查看这些通知。
+
+这时就要用到 <Space>sn 快捷键了。它会打开"Noice"菜单。Noice 就是负责显示这些小弹窗的插件。一般来说，你可以：
+
+- 按 <Space>sn + a 查看所有最近的通知
+- 按 <Space>sn + l 只看最后一条通知
+
+你也可以用 <Space>snd 来关闭当前显示的通知。不过说实话，等你按完这四个键，通知可能早就自己消失了！
+
+第二个重要的调试命令是 <Space>cl。它会运行 :LspInfo 命令，显示：
+
+- 当前正在运行的语言服务器有哪些
+- 这些服务器分别在处理哪些文件
+
+举个例子，当我编辑 Markdown 文档时，LSPInfo 窗口是这样的：
+
+<img src="mymedia\lsp-info-dark.png" alt="lsp info dark" style="zoom:50%;" />
+
+从这个窗口看，一切正常（虽然我有点意外 tailwind 服务器会和 Markdown 关联）。如果你的语言服务器出问题了，这个窗口通常能给你一些提示。
+
+如果语言服务器出现临时问题，比如：
+
+- 显示错误的诊断信息
+- 找不到明明存在的文件
+
+这时候用 :LspRestart 命令重启一下就好了。比如 Svelte 语言服务器经常检测不到新文件，我最近经常要用这个命令，所以我还专门给它设置了快捷键。
+
+还有两个特别有用的命令：
+
+1. :checkhealth
+2. :LazyHealth
+
+这两个命令都能显示已安装插件的健康状况：
+
+- :checkhealth 是 Neovim 的命令，插件可以注册健康检查信息
+- :LazyHealth 专门显示 LazyVim 相关的信息
+
+这两个命令的输出有很多重叠，但是：
+
+- :LazyHealth 的输出更容易读懂
+- :checkhealth 的信息更全面
+
+所以我一般先用 :LazyHealth，如果找不到答案再用 :checkhealth。
+
+不要期望所有检查都是绿色的，这样会把自己逼疯的。比如我的 checkhealth 输出就有很多来自 Mason 的警告：
+
+<img src="mymedia\lazy-health-dark.png" alt="lazy health dark" style="zoom:50%;" />
+
+只有我最近用过的工具（以及出于某种原因的Ruby）是已安装的。对于那些我平时不需要编辑的语言，就会显示警告。所以如果你不写 Java 代码，就没必要费心去解决 java 的警告。
+
+## [10.4. 诊断功能](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_diagnostics)
+
+语言服务器有很多有用的功能。它可以：
+
+- 进行代码检查，找出代码中的问题
+- 格式化代码
+- 提供上下文相关的代码导航
+- 提供文档说明
+
+我们会在这章和下一章详细讨论这些功能。
+
+在第七章中，我们已经简单接触过诊断功能。当时我们学习了如何使用 unimpaired 快捷键在错误信息之间跳转：
+
+- [d、[w、[e：跳转到上一个诊断处
+- ]d、]w、]e：跳转到下一个诊断处
+
+诊断信息通常会以波浪线（在某些不支持波浪线的终端上，他是下划线）的形式出现在代码下方。当你跳转到这些位置时，通常会弹出一个小窗口，告诉你这里出了什么问题。
+
+比如看这个截图，我打错了一个单词导致了一个错误：
+
+<img src="mymedia\diagnostic-dark.png" alt="diagnostic dark" style="zoom:50%;" />
+
+我把"tracingMiddleware"拼错了。在这一行，我可以看到一条错误提示。当我用 ]d 跳转到这个错误时，会弹出一个窗口。这个窗口有时候会显示比行内提示更详细的信息。
+
+另外，导入正确拼写变量的那一行也显示了一个提示，告诉我这个变量没有被使用。
+
+诊断信息用不同的颜色表示严重程度，这样你就能判断是否值得修复。我通常会尝试修复或消除所有诊断信息，因为如果有太多干扰信息，诊断功能就会变得不那么有用。
+
+如果在导航到诊断位置时窗口没有弹出，只要你的光标位于带下划线的文本范围内，就可以使用 <Space>cd 快捷键来调出窗口。
+
+### [10.4.1. Trouble 和 Quick Fix（todo）](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_trouble_and_quick_fix)
+
+你还可以使用 Trouble 来导航诊断信息。Trouble 是 LazyVim 的一个插件，它提供了增强版的 Quickfix 功能。（如果你是 Vim 新手，可能不知道 Quickfix 是什么，他其实是vim/neovim原生的一个功能，本质上是一个特殊的列表窗口，用于收集和展示各种位置信息，比如搜索结果、编译错误、代码诊断等）
+
+对于 **Quickfix**，想要列出当前文本的诊断信息，使用 <leader>xq
+
+![image-20241222124955823](mymedia\quickfix_preview.png)
+
+> （ethan）如果当前文本确实有诊断信息，比如一些错误、警告，但是使用 <leader>xq 打开的窗口中却没有任何显示，可以先在命令模式中键入：lua vim.diagnostic.setqflist()，将所有诊断发送到 quickfix。
+
+对于 **Trouble**，想要列出当前所有已打开的 Buffer 的诊断信息，使用 <leader>xx，若只想列出当前 Buffer 中的诊断信息，使用 <leader>xX。
+
+![image-20241222125126406](mymedia\trouble_preview.png)
+
+在 Lazyvim 中，将 Quickfix 和 Trouble 的功能都集成到了 Trouble 菜单中，使用 <leader>x 菜单（我猜 x 代表"fiX"）即可打开：
+
+![diagnostics menu dark](mymedia\diagnostics-menu-dark.png)
+
+**Trouble 作为增强版的 Quickfix，他除了能够提供导航诊断信息的功能外，还可以做很多其他的事情。**
+
+如上所述，Trouble 窗口本质上是一个文件和行号的列表，这些位置因某些原因被标记为"感兴趣"（这些原因可能是：诊断、TODO、FIXME），具体原因取决于上下文和你如何打开它们。你可以轻松地在这些目标位置之间跳转。
+
+- 对于 todo，按 <Space>xt ：
+
+  ![image-20241222130205982](mymedia\trouble_todo.png)
+
+- 对于搜索结果，在使用 telescope 时，按 ctrl + t（trouble）（如果按 ctrl + q（quickfix）则会发送到 quickfix 窗口打开）：
+
+  ![image-20241222131130087](mymedia\trouble_search.png)
+
+可以在 Trouble 窗口移动光标到相应行并按 Enter（或者在打开了 Trouble 窗口期间，使用 [q 和 ]q 命令）来在多个文件目标之间导航。
+
+如果你想知道 <leader>x 菜单中的"Location List"是什么，它是一个与当前窗口（不是缓冲区）关联的 Quick Fix 窗口（意味着每个窗口都可以独立打开他）。我从不使用它，因为我的大脑一次只能处理一个问题！
+
+## [10.5. 代码操作](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_code_actions)
+
+代码操作（Code Actions）是让 VS Code 在刚推出时显得很神奇的功能之一。不是说这个概念很新，因为它已经存在很久了，而是因为它真的很好用。现在，我们已经有点把它当作理所当然了。
+
+![image-20241221164214005](mymedia\vs-code_codeaction.png)
+
+你可能习惯于（在 VS Code 中）用鼠标点击灯泡图标或右键点击诊断信息来访问"代码操作"。在 LazyVim 中，这当然是通过快捷键实现的。使用你习惯的快捷键导航到诊断位置（我习惯用 ]d），然后按 <Space>ca 打开菜单，其中 c 和 a 表示"code action"。接着会弹出一个选择器菜单，列出所有可以执行的操作。你可以使用方向键，或者按 <Escape> 后用 j 和 k 键在选项之间导航，也可以输入数字或任何文本来过滤。按 <Enter> 执行操作，或按 <Escape><Escape> 取消菜单（只按一次 escape 可以进入搜索框的普通模式，这样你就可以使用你现在已经熟悉的众多 LazyVim 导航快捷键）。
+
+## [10.6. Linting](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_linting)
+
+代码检查（Linting）主要是通过 nvim-lint 插件而不是 LSP 来处理的。在我使用 LazyVim 之前，这是一个主要的痛点，因为让 LSP 和代码检查器协同工作通常需要一些严肃的故障排除。再加上格式化，我可能要花一两天时间才能搞定。说实话，在我使用 VS Code 时也是这样。
+
+使用 LazyVim 时，你可能根本不知道是谁在为你做代码检查。说实话，我也不知道。我的一些诊断信息来自 LSP，另一些来自代码检查器。我不会去追究错误的来源，我只管修复它们。
+
+代码检查最困难的部分（至少在它不能自动工作时）是确保安装了适当的检查器（Mason 在这方面可以帮你），并且配置正确。如果你很幸运，你喜欢使用的语言有 Lazy Extras，那么它可能已经配置正确了。否则，你可能需要做一些调整。这些调整取决于具体的语言，但你可能需要在插件目录中的 extend-nvim-lint.lua 文件中添加类似这样的内容：
+
+```lua
+return {
+  "mfussenegger/nvim-lint",
+  opts = {
+    linters_by_ft = {
+      typescript = {
+        -- lint settings for Typescript
+      }
+    },
+  },
+}
+```
+
+更多信息请查看 :help nvim-lint，如果需要进一步说明，请参考 LazyVim 关于这个配置的文档。
+
+好消息是，一旦配置好代码检查，错误就会通过上面描述的诊断功能显示出来，你可以使用相同的快捷键、Trouble 窗口、代码操作等来处理它们。
+
+## [10.7. Formatting](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_formatting)
+
+和代码检查类似，代码格式化可以由某些 LSP 处理，但人们发现使用语言服务器往往比直接调用格式化工具更复杂。所以 LazyVim 自带了 conform.nvim 插件。
+
+同样和代码检查类似，如果你够幸运，在安装适当的 Lazy Extra 和/或 Mason 工具后，它就会自动工作。但是，如果你不喜欢默认的格式化工具（或者它不工作），你就需要熟悉 LazyVim 和 conform.nvim 的文档，找出所需的具体配置。
+
+我唯一需要手动配置的格式化工具是用于 Markdown 的 Prettier。它的配置看起来和 nvim-lint 的配置非常相似：
+
+```lua
+return {
+  "stevearc/conform.nvim",
+  opts = {
+    formatters_by_ft = {
+      ["markdown"] = { "prettier" },
+    },
+  },
+}
+```
+
+一旦设置好了（我承认这可能并不容易），LazyVim 中的格式化通常就是一劳永逸的：保存文件时它就会自动格式化。如果你想在不保存的情况下手动调用格式化，可以使用 <Space>cf 快捷键。我不得不强调你有多幸运，因为在没有 LazyVim 的情况下，人们浪费了无数时间试图让"保存时格式化"的自动命令正常工作！
+
+## [10.8. 配置非标准 LSP](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_configuring_non_standard_lsps)
+
+如果你安装了一个 LazyVim 不知道的 LSP，你可能需要调整 nvim-lspconfig 插件。你至少需要让它知道你的语言服务器是可用的，可能还需要根据你的需求进行配置。例如，我最喜欢的编程语言之一是 Rescript，它没有庞大的生态系统，因此也没有 LazyVim extra。我可以很容易地用 Mason 安装语言服务器，但我还需要在 extend-lspconfig.lua 文件中添加以下内容，让 LazyVim 能够识别它：
+
+```lua
+return {
+  "neovim/nvim-lspconfig",
+  opts = {
+    servers = {
+      rescriptls = {},
+    },
+  },
+}
+```
+
+再举个例子，css_variables 语言服务器（我在出色的 open-props CSS 框架中使用它）对 css 文件可以开箱即用，但我需要使用不同的配置来在 svelte 文件中激活它：
+
+```lua
+return {
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        css_variables = {
+          filetypes = { "css", "scss", "less", "svelte" },
+        },
+      },
+    },
+  },
+}
+```
+
+## [10.9. 总结](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-10/#_summary_10)
+
+在本章中，我们学习了 LazyVim 如何集成 VS Code 带给世界的语言服务器协议。它通常快速且无痛，这比手动配置 LSP 要好得多。不过，在代码检查和格式化方面可能会遇到一些麻烦。这在任何编辑器中都是如此，有时它们会帮你，有时又会妨碍你。如果你遇到困难，可以在 GitHub 上的 LazyVim discussions 组中寻求帮助（但先自己搜索排查一下，你可能不是第一个遇到这个问题的人）。
+
+在下一章中，我们将学习更多关于使用 LSP、TreeSitter 和其他插件进行代码导航的内容。
+
+# [第11章：在源文件间导航](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_navigating_source_files)
+
+在前面的章节中，我们学习了在单个缓冲区内以及在打开的标签页和窗口之间导航的多种方法。这一章我们将详细介绍在不同的源文件之间导航的各种方法。
+
+## [11.1. 跳转到定义](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_go_to_definition)
+
+我认为"跳转到定义"是语言服务器给我们带来的最有价值的功能。主流的 IDE 在很久以前就已经为编译型语言提供了这个功能。但是对于像 Python 这样的动态类型语言来说，静态分析一直都很困难，这类功能往往效果不太理想。
+
+"跳转到定义"这个功能的名字起得很贴切 —— 它可以让你的光标从当前所在的关键词直接跳转到这个关键词被定义的位置，不管这个定义在哪个文件里。
+
+我最常用这个功能的场景是：当我在看一个函数的调用位置时，想要查看这个函数的具体实现。只需要简单地按下 gd（这也是 LazyVim 中最容易记住的快捷键之一），就能立即跳转过去。
+
+根据你正在编辑的语言的 LSP（语言服务器）的性能，这个功能通常还能让你跳转到第三方库的文件或类型声明中，这样你就能看到更底层发生的事情。
+
+跳转到定义是和上下文相关的，但通常都能按照你的预期工作。比如，当你的光标在一个变量上时，gd 会跳转到这个变量的初始化位置；如果光标在一个函数上，它会跳转到这个函数的定义位置。
+
+通常，当你跳转到定义并了解到需要的信息后，你会想立即回到之前的位置。就像我们在第 3 章讨论过的，你可以使用 Control-o 轻松地返回（而 Control-i 则可以在你的跳转历史中向前移动）。
+
+## [11.2. 跳转到引用](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_go_to_references)
+
+与"跳转到定义"相对的是"跳转到引用"命令。当你想要看到某个函数、变量或类型在哪些地方被使用了，就可以使用 gr 命令。
+
+与定义或声明不同，一个词通常会有多个引用位置（毕竟一个从不被使用的变量是没有意义的）。所以当你输入 gr 时，它通常不会直接跳转到某个位置，而是会弹出一个选择器，显示光标下这个词的所有引用位置。这个选择器带有 Telescope 和 Fzf.lua 提供的所有预览和过滤功能。
+
+有时候你可能想要对每个引用都执行某些操作，比如重命名或添加参数之类的。你可以重复使用 gr 命令，或者使用 <Space>sR 快捷键来重新打开上次的搜索。不过，使用我们在第 10 章学过的 Trouble 列表通常会更有用。
+
+要使用 Trouble 列表，先用 gr 在选择器中显示引用，然后使用 Control-t 打开 Trouble 窗口，窗口中会显示所有匹配项。这样你就可以使用 ]q 和 [q 在它们之间跳转，而不用每次都打开选择器。如果你更喜欢使用较为简单的 Quick Fix 窗口，可以在选择器中使用 Control-q 来代替 Control-t。
+
+![image-20241221172319002](mymedia\trouble_ctrl-t.png)
+
+Control-t 和 Control-q 在大多数选择器中都可以使用。我建议你养成使用它们的习惯，特别是当你需要一个比选择器更持久的列表时。
+
+## [11.3. 上下文相关的帮助](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_context_specific_help)
+
+大多数非模态编辑器在你把鼠标悬停在某个词或符号上时，都会显示帮助或"悬停"文本。这些文本的数量和价值根据 LSP 的不同而差异很大，但一般会包括函数签名和光标下单词的文档说明。
+
+虽然可能可以设置 Neovim 在鼠标悬停时显示帮助文本，但是既然 LazyVim 提供了这么好用的键盘导航，为什么还要把手移到鼠标上呢？你可以直接使用（大写的）K 快捷键。是的，K 这个快捷键确实不太好记，但是 H 和 ? 已经被占用了。
+
+> （ethan）我的配置中，将此功能映射成了 <Space>ck
+>
+> ![image-20241221173108183](mymedia\hover_doc.png)
+
+> 实际上，K 代表 "keywordprog"，这是一个传统的 Vim 概念，在现代已经被语言服务器取代了。所以 LazyVim 就重新利用了这个快捷键。
+
+## [11.4. 列出符号](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_listing_symbols)
+
+另一个好用的 LSP 功能是搜索当前文件或项目中的所有符号。如果你正在编辑一个特别长的文件，需要跳转到一个离光标很远的函数，你可以使用 <Space>ss 命令（助记词是 "search symbols"）。正如双 s 所暗示的，这是一个很常用的操作。
+
+弹出的对话框现在应该很熟悉了，因为它就是我们常用的选择器：
+
+<img src="mymedia\telescope-symbols-dark.png" alt="telescope symbols dark" style="zoom:50%;" />
+
+你已经知道如何使用它了。不过，我想提醒你几个让它更有用的选择器技巧：
+
+大多数时候，当我使用这个符号选择器时，我只关心函数，有时候是类。所以上面截图中散布的字段和属性只是干扰。虽然可以配置选择器只显示特定类型的符号，但我更喜欢用一个快速技巧来把结果缩小到只显示函数：先输入（部分）单词 function。
+
+因为选择器在结果的第二列包含了 "function" 这个词，它会很方便地过滤掉所有不包含这个词的行。很方便吧。
+
+我可以在 "function" 这个词后面输入一个空格，告诉选择器在第一列中继续后续搜索。所以 "func api" 会过滤出所有包含 "api" 的函数。
+
+我的第二个提示是不要忘记使用 Control-q 和 Control-t 快捷键，把选择器的结果导出到 Quick Fix 或 Trouble 列表中。它会为你过滤出的任何符号生成一个快速简单的目录窗口。
+
+如果你想搜索整个项目中的所有符号，可以使用 "更大范围" 的助记符。<Space>sS 会执行这样的搜索。不过，要注意并不是所有的 LSP 都支持工作区符号搜索。有些只搜索当前打开的文件，即使是那些完全支持工作区符号搜索的 LSP，很多也慢得无法使用。
+
+## [11.5. Neo-tree 也有符号大纲](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_neo_tree_also_has_a_symbols_outline)
+
+如果你喜欢使用 Neo-tree 侧边栏来选择文件，你可能也会喜欢它基于聚焦文件的符号列表功能。不过在撰写本文时，Neo-tree 在其 Readme 中声称符号选择器是 "实验性" 的，所以在默认情况下没有显示它的快捷键。
+
+可以使用命令 :Neotree document_symbols 在你的 Neo-tree 侧边栏中渲染符号选择器：
+
+<img src="mymedia\neotree-symbols-dark.png" alt="neotree symbols dark" style="zoom:50%;" />
+
+> （ethan）不过这个命令也不是开箱即用的，还需要额外的配置（请参考这个插件的文档），否则会报错。
+
+你可以通过鼠标双击，或将光标移动到包含你想要跳转的符号的行上，按下 <Enter> 来导航到文档中的符号。你也可以使用 s 或 S 在垂直或水平分割的新视图中打开缓冲区中的给定符号。
+
+如果你发现你对 Neo-tree 符号选择器爱不释手，你可能想要为该命令添加一个键盘快捷键。只需在你的插件目录中的文件中添加以下配置：
+
+```lua
+return {
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    keys = {
+      {
+        "<leader>sO",
+        "<cmd>Neotree document_symbols<cr>",
+        desc = "Document Symbols (Neo-tree)",
+      },
+    },
+  },
+}
+```
+
+如果 <Space>s<Shift-O> 不适合你，可以随意使用其他快捷键。
+
+## [11.6. ...Trouble 也有！](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_and_so_does_trouble)
+
+你也可以使用 Trouble 插件打开符号大纲。快捷键是 <Space>cs，你可能很难找到它，因为它在 Code 菜单而不是 Search 菜单中。与大多数 Trouble 窗口不同，它默认在右侧边栏打开。它创建了一个漂亮的树状视图，你甚至可以使用我们在第 9 章讨论过的折叠快捷键来折叠和展开树节点。
+
+<img src="mymedia\trouble-symbols-dark.png" alt="trouble symbols dark" style="zoom:50%;" />
+
+你可以使用用于调整窗口大小的快捷键（<Space>w< 和 <Space>w>）来调整 Trouble 窗口的大小。当你将光标移动到 Trouble 窗口上时，它所在的符号会自动滚动到视图中。
+
+使用 Trouble 窗口最快的方法是使用 Seek 模式。记住 Seek 模式可以跳转到任何当前可见的窗口，包括 Trouble。所以如果我正在编辑上面的文件，并且我的光标当前在文件的末尾附近，我可以使用 spub 进入 Seek 模式并搜索字符 "pub"。这将在 Trouble 窗口中的 publicKeyToken 上放置一个标签。如果我键入那个标签（字符），我的光标就会跳到 trouble 窗口，我的编辑器窗口会立即滚动到相关的函数，接着只需按 Enter 键就可将光标移回我正在编辑的文件。
+
+> （ethan）如果 enable 了 aerial.nvim 插件，则 <Space>cs 会启用 aerial.nvim 插件的符号列表功能。
+
+## [11.7. 上下文](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_context)
+
+nvim-treesitter-context 扩展是一个帮助你了解当前文件位置的有用工具。它使用 treesitter 来确定你所在的函数和类型，然后将定义这些类型的行固定在编辑器顶部。
+
+> 像往常一样，通过访问 :LazyExtras 并在包含 nvim-treesitter-context 的行上按 x 来启用它。
+
+这个插件会跟踪你的光标当前所在的类或函数。如果函数或类型定义太长以至于签名滚动出屏幕，它会很贴心地将该签名复制到代码窗口的第一行或前几行，并用稍微不同的背景色突出显示。
+
+用一张参考图片来描述会更容易理解，请看这个截图：
+
+<img src="mymedia\context-dark.png" alt="context dark" style="zoom:50%;" />
+
+在这张图片中，稍微有阴影的前两行是提供上下文的，而不是缓冲区的一部分。第一行告诉我我在 DexieApiClient 类中，第二行告诉我我当前正在查看该类中的 forceAddMemberToRealm 方法。
+
+特别注意相对行号列。DexieApiClient 类的行在我当前光标位置上方 109 行，而 async forceAddMemberToRealm 行在其上方 27 行。相比之下，函数的第一个可见行只在我当前光标位置上方 13 行。
+
+这个效果很微妙，上下文部分的定义往往正是你在编码时需要的。而如果你确实需要滚动到签名处，只需输入相对行号后跟 k，就可以直接到达。
+
+如果你需要临时禁用上下文，使用快捷键 <Space>ut。我们还没有看到太多 <Space>u 菜单，在这里你可以切换各种用户界面效果。这主要是因为默认用户界面配置得足够好，你不会经常想要改变它！
+
+## [11.8. 使用标记（书签）导航](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_navigating_with_bookmarks)
+
+你已经知道如何使用 Control-o 和 Control-i 在历史记录中导航，以及使用各种动作在文档中有效地跳转。
+
+Vim 还包含一个 "书签" 功能，不过它被称为 "marks"，我猜是因为 b（bookmark） 字符已经被使用了，而 m 字符在 Vim 快捷键中是空闲的。
+
+标记是内置在 Vim 中的，而 LazyVim（像往常一样）添加了一些小改进。
+
+就像我们在第 8 章中介绍的寄存器一样，标记可以分配给字母表中的每个字母。此外，某些标点符号代表特殊的系统设置标记，你可以跳转到这些标记，但不能设置它们。
+
+要在某行设置标记，在任何字母、字符的前面加上字母 m。所以 ma 会在当前行设置标记 a。你可以通过左侧槽中的 a 字符看出这一行被标记为 a：
+
+<img src="mymedia\mark-a-dark.png" alt="mark a dark" style="zoom:50%;" />
+
+现在我可以从当前文件的任何位置使用撇号（'）后跟 a 来跳转到标记为 a 的行。
+
+我不经常使用这个功能，因为在文件内导航时，其他工具往往比手动设置书签更有用。但是，如果我用大写字母标记了这一行（例如 mA），我就可以使用 'A 从任何打开的文件跳转到这个标记。
+
+所以本质上，你可以在你打开的每个文件中设置多达 26 个本地标记，以及 26 个可以从任何文件访问的全局标记。
+
+方便的是，如果我只输入一个撇号（在普通模式下），LazyVim 会弹出一个当前可用的所有标记的菜单：
+
+<img src="mymedia\marks-dark.png" alt="marks dark" style="zoom:50%;" />
+
+这个列表显示了我在这个文件中设置的小写标记，几个可以使用标点符号跳转到的系统标记（注意右侧有每个标记的描述，所以你不必记住它们），两个我用来跳转到 kitty 和 fish 配置文件的全局标记，以及十个数字标记。
+
+我发现数字标记有点无用。它们基本上指向你上次关闭 Neovim 时的文件和光标位置。除非我在临时实例中编辑提交消息或拉取请求描述，否则我不经常关闭 Neovim，所以我的数字标记大多只是这些临时文件。如果我需要回到之前的位置，使用 <Space>qs 快捷键来恢复会话通常会比数字标记更有用。
+
+按撇号键（'）时弹出的菜单通常足以找到标记，但你也可以使用 <Space>sm 快捷键在选择器中搜索标记。我通常没有足够多的活动中的书签来让这个功能有用，但如果你设置了很多全局和本地标记，并且记不住哪个字母与哪个标记相关联，使用选择器来搜索标记的内容可能会很有帮助。
+
+当你设置了标记，你一定会被 "如何删除它？" 这个问题困扰。删除标记可能与 "如何退出 Vim" 一样是最常见的查询之一！没有删除标记的快捷键。相反，你需要使用命令 :delmarks <mark> 来删除给定的标记。这可以缩写为 :delm <mark>。所以要删除这个文件中的 a 标记，需要使用命令 :delmarks a。你不必在标记的行上就能删除标记。
+
+> 在命令模式下，可以使用 "标记访问" 代替 "行号范围"。例如：
+>
+> 若想将标记 a 和标记 b 之间的文本写入文件，你可以使用 :'a,'b write somefile.txt。
+>
+> 额外提一点，你也可以在可视模式中选定一段文本，然后再进入命令模式，就会出现 '<,'> 字样，那是因为 '< 和 '> 代表最近一次可视选择的开始和结束。
+>
+> 即使选择已经取消，你也可以使用 '< 和 '> 跳转到最近一次选择的开始或结束位置。
+
+我经常使用的另一个符号标记是 '.，它跳转到我最后插入或更改文本的位置。有时这比一系列 Control-o 按键更快。
+
+## [11.9. 总结](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-11/#_summary_11)
+
+在本章中，我们学习了如何使用转到定义、转到引用、以及使用各种 "文档符号" 插件来导航代码文件。
+
+我们看到了 LazyVim 如何为我们提供文档中当前位置的上下文，以及如何查找光标下符号的文档。
+
+最后，我们介绍了 Vim 标记，这是一个更加 "手动的" 跟踪你可能想要跳转到的位置的过程。
+
+在下一章中，我们将学习如何在当前文件和整个项目中搜索**文本**。
+
+
+
+
+
+
 
 
 
