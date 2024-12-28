@@ -3510,79 +3510,349 @@ HELLO One BEAUTIFUL two three WORLD
 
 在下一章中，我们将学习一些无法归类到其他章节的随机编辑技巧。
 
+# [第14章：其他实用编辑技巧](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_miscellaneous_editing_tips)
 
+在我们深入了解 LazyVim 提供的那些"类-IDE"功能之前，我想先分享一些能让你的编辑体验更加有趣的小技巧。这一章会包含一些零散的内容，主要是一些我没法归类到其他章节的命令和插件。
 
+## [14.1. 字数统计](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_word_counts)
 
+按下 g<Control-g> 可以显示一条当前光标位置相关的信息：
 
+<img src="mymedia\word-count-dark.png" alt="word count dark" style="zoom:50%;" />
 
+其中最值得注意的是"Word 110 of 3179"，这告诉我这一章总共有超过3000个单词。
 
+## [14.2. 字符位置交换](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_transposed_characters)
 
+你是不是经常打字太快，不小心把两个字符的顺序打反了？
 
+只需要用 xp 就能把一个字符和它右边的字符交换位置。比如，你不小心打成了 ra，但其实想打的是 ar，只要把光标放在 r 上按 xp 就行了。
 
+这不是什么特殊的自定义命令，它只是结合了"删除字符（x）"和"在光标后粘贴最后删除的内容（p）"这两个基本命令，把字符从当前位置移到了下一个位置。你也可以用类似的方法移动其他文本。比如，用 dwwP 移动一个单词，或者用 daaWp 删除一个函数参数并把它移到参数列表的后面。
 
+## [14.3. 代码注释与取消注释](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_commenting_and_uncommenting_code)
 
+LazyVim 附带了一个用于在旧版 Neovim 中注释和取消注释代码的插件，但从 Neovim 0.10 开始，这实际上是 Neovim 的一个原生功能。
 
+切换注释的操作命令是 gc，后面可以跟动作命令或文本对象。比如 gc5j 会注释当前行和下面5行，而 gcap 会注释由空行分隔的整个段落。
 
+这个命令和 S 命令配合起来特别好用，可以注释"包围对"文本对象。例如，在输入 gcSh 后，会注释被 h 标签包围的文本对象。
 
+若要注释单行，可以用简单的快捷键 gcc。这个命令可以加数字前缀，比如 5gcc 会注释5行（比 gc4j 好输入一点）。
 
+和大多数操作命令一样，gc 也可以作用于可视模式选择的内容，比如用 V5j 选择了当前行和下面5行后，再按 gc 即可。
 
+gc 实际上是个开关（切换）命令，如果一行已经被注释了，它会取消注释而不是加上第二个注释。所以，连续按两次 gcc 相当于什么都没做。不过要注意，如果你选中的内容既有注释行又有非注释行，可能会导致重复注释。这通常是符合预期的：如果你临时注释了一块包含其他注释的代码，当你取消这块代码的注释时，原来的注释应该保持注释状态。
 
+作为快捷方式，如果你想在当前行的上方或下方添加新的注释行，而不是注释当前行，可以用 gcO 和 gco。严格来说这是个新的操作命令，但为了好记，你可以理解为把 gc 和打开新行的命令（o 和 O）组合在一起。
 
+## [14.4. 数字的增减操作](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_incrementing_and_decrementing_numbers)
 
+在普通模式下，当光标位于数字上时，可以用 Control-a 来增加这个数字。这个命令很智能，会自动处理进位的问题。比如，按 Control-a 时，9 会变成 10，99 会变成 100，不管光标在数字的哪个位置都可以。
 
+要减少数字，用 Control-x。
 
+我曾经很讨厌这两个快捷键，因为它们用得不多，但在需要用的时候又总是记不住。所以我经常手动修改数字，一边想着"我得去查一下那个数字增减的快捷键"，但帮助文档里，只能依据快捷键来检索其作用！
 
+后来我学会了 :helpgrep 命令，它可以搜索帮助文档。在我记住快捷键之前，我至少记住了可以用 :helpgrep Adding and subtracting 来查找它们~
 
+其实这些快捷键是有记忆规律的：Control-a 就是"Add（添加）"，这个很好记。Control-x 稍微难记一点，但只要你记住了 Control-a，就可以用 :help CTRL-a 找到与它相关的 Control-x。虽然不知道对别人有没有帮助，但我是把 x 理解成"cross（划掉）一个数字来减少"。
 
+用 g<Control-a> 和 g<Control-x> 可以对连续的多行数字进行递增或递减。这在处理编号列表时特别有用。比如你想做一个有 10 项的列表，先输入 `o1.<esc>` 创建一行"1."，然后输入 `9.` （`.` 是重复命令）重复这个命令9次。然后你会得到：
 
+```
+1.
+1.
+1.
+1.
+1.
+1.
+1.
+1.
+1.
+1.
+```
 
+目前你的光标是在最下面的 1. 上，然后可以使用 V'[ 选中刚插入的9行，因为 '[ 标记指向最近修改文本的第一个字符。然后输入 g<Control-a> 递增这些数字：
 
+```
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+```
 
+用几个看起来奇怪的按键:`oi1.<Esc>9.V'[g<Control-a>`，就完成了如上的动作。
 
+> （ethan）但是我实际试下来，有几个问题（可能是 bug？）：
+>
+> 1. `o1.<esc>` + `9.` 有时不会按我的预期去复制，比如会多带一个空格或者回车行。
+> 2. `V'[` 没有按我的预期去选中，实际上它往上选中了更多的行。
+> 3. `g<Control-a>` 也没有从 1. 开始递增，而是去掉了 1. 从 2. 开始递增。
 
+如果需要在列表中间插入新条目，添加条目后，选中后面的条目，按 Control-a 就能重新排序。
 
+Neovim 会智能地只增加每行遇到的第一个数字。这意味着即使一行中有多个数字，也能轻松处理，比如修改书籍大纲。看看这个假设的大纲：
 
+```
+Chapter 1: Intro and Install
+Chapter 2: 1 Weird modal editing trick
+Chapter 3: The numbered marks 1-9
+Chapter 4: Navigating things
+...
+```
 
+假设我想把第1章分成两章："Intro"和"Install"。我可以直接插入新章节：
 
+```
+Chapter 1: Intro
+Chapter 2: Install
+Chapter 2: 1 Weird modal editing trick
+Chapter 3: The numbered marks 1-9
+Chapter 4: Navigating things
+...
+```
 
+然后用 <Shift-V>} 选中原来编号为 2 及其后面的章节。按 Control-a 时，只有章节号会递增，而"1 Weird trick"中的 1 和 "marks 1-9"中的 1-9 不会受到影响：
 
+```
+Chapter 1: Intro
+Chapter 2: Install
+Chapter 3: 1 Weird modal editing trick
+Chapter 4: The numbered marks 1-9
+Chapter 5: Navigating things
+...
+```
 
+### [14.4.1. Dial.nvim 扩展](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_the_dial_nvim_extra)
 
+如果你觉得这些增减快捷键就像厨房里那种一个月才用一次的单一功能工具，不妨考虑从 :LazyExtras 安装 editor.dial 扩展。
 
+安装了 dial.nvim 插件后，能让你增减更多有趣的内容。我主要用它来切换布尔值（Control-a 和 Control-x 都能在 true 和 false 之间切换），它还能递增单词（"first"递增到"second"）、月份（"December"递增到"January"）、版本号、Markdown 标题等。如果需要，你还能添加自己的模式（请自行参阅这个插件的 readme）。
 
+## [14.5. 修改缩进](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_changing_indentation)
 
+在普通模式下，可以用 > 和 < 来增加或减少缩进。最常用的是双击这些键（<< 和 >>）来改变当前行的缩进。不过，你也可以配合动作命令来使用，比如：>Sx（缩进由 x 标签标识的语法树实体）和 >ap（缩进整个由空行分隔的段落）。> 和 < 也可以和可视化模式配合使用。
 
+不过这些动作命令在使用计数时，可能会有点让人有点困惑。你可能以为 2>> 会把当前行缩进两个层级，但实际上它会把两行各缩进一个层级。
 
+如果你想一次性改变多个缩进层级，需要使用 v。比如：要把当前行缩进五个层级，最快的方法是用 v5>，这比输入十个 > 要方便得多。这对任何可视选择都有效，比如可以用 va{5> 把整个代码块缩进五个层级。
 
+通常，你想要的只是"让代码按照这个编程语言的规范正确缩进"。如果配置好了 conform.nvim，最简单的方法就是：直接保存文件。LazyVim 默认开启了"保存时格式化"，如果能找到格式化工具就会使用它。你也可以用 gq 配合动作命令（最常用的是 gqag 来格式化整个文件）或用可视模式配合 gq 来应用格式化。
 
+不过，如果你不想保存文件，或者没有使用 conform.nvim，也可以用 = 命令。= 的行为会根据编程语言略有不同，但通常会对可视选择（或动作选择）的行应用缩进引擎。这些行都会按照某种"正确"的标准进行缩进。
 
+在插入模式下也可以调整缩进。Control-t 和 Control-d 快捷键会在插入文本时增加和减少当前行的缩进。记忆方法是"add tab（添加制表符）"和"dedent（减少缩进）"。
 
+## [14.6. 重排文本](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_reflowing_text)
 
+在写这本书的时候，我经常用到 gw 命令。它会在（默认）每行的八十个字符处（可以用 :set textwidth=<number> 配置）智能的重新换行（w 表示 wrap），且不会打断单词。比如：
 
+<img src="mymedia\no_reflow-txt.png" alt="image-20241228152346912" style="zoom:50%;" />
 
+选中这段文本，使用 gw 命令后：
 
+<img src="mymedia\reflow-txt.png" alt="image-20241228152550226" style="zoom:50%;" />
 
+使用 gww 命令可以重排当前行，让它在适当的位置换行，或者用 gwip 来重排整个段落。推广来说，gw 可以配合任何动作命令或可视选择。要重排整个文件，可以使用 gwig。
 
+这个命令严重依赖换行符的存在。结合如下的例子：
 
+<img src="mymedia\reflow-txt-newline.png" alt="image-20241228154432478" style="zoom:50%;" />
 
+> （ethan）对于中文句子，gw 命令的数量计算是符合预期的。不过对于"单词"的定义，中文和英文不同，所以执行 gw 命令时，可能不会符合预期。
 
+## [14.7. 通过外部程序过滤](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_filtering_through_external_programs)
 
+你还可以把文本通过管道传给任何遵循 Unix 规范的外部程序：即从 STDIN 读取输入并输出到 STDOUT 的程序。要这样做，先在可视模式下选择要处理的文本，然后输入 ! 符号。这会打开命令窗口，并用"可视选择"作为范围，此时命令窗口会出现 '<,'>! 字符。然后再输入一个环境变量中存在的命令，选中的文本就会被该命令的输出替换。
 
+这里有一些例子，假设你安装了一些常见的 Unix 工具：
 
+- !grep -v a：会用同样的文本替换选择的文本，但会删除包含字母"a"的行。
+- !tr -s ' '：会调用 tr 命令，把多个连续的空格替换成单个空格。
+- !jq：会用 jq 格式化 json 文本。
+- !pandoc -f markdown -t html：是个快速把简单的 Markdown 转换成 HTML 的好方法。
+- !./my-custom-script：会将选中的文本传递给你编写的自定义脚本。
+- !python ./something.py：会通过你写的 Python 脚本处理选中的文本。
 
+> 如果你只想运行 shell 命令，但不想修改文本，不提供范围就行。比如 :**!**mkdir foo 会运行 mkdir 命令但不会影响到你的文本内容。
 
+我觉得这个功能用得太少了实在可惜。很多内置在 Neovim 中或通过插件提供的功能，完全可以通过管道输入输出的命令行程序来实现。举个例子，我觉得 Neovim 自带的 :sort 命令让编辑器更加臃肿了，其实用 !sort 运行外部排序工具一样能完成工作。
 
+## [14.8. 拼写检查](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_spell_check)
 
+你可以用 <Space>us 开启或关闭拼写检查。开启后，拼写检查器检查到的错误，会用类似诊断的波浪线标记出来。若你想在拼写错误之间跳转，需要用 [s 和 ]s 而不是（诊断快捷键）[d 和 ]d 。
 
+要让 Vim 给出拼写建议，使用 z= 命令。这个快捷键很难记住。。。如果你能记住它在 z 菜单而不是 Space 菜单里，至少还能在菜单中再次找到它。拼写建议会以编号菜单的形式弹出，输入拼写建议的编号前缀，即可应用它：
 
+<img src="mymedia\spell-suggest.png" alt="image-20241228180558170" style="zoom:50%;" />
 
+## [14.9. 插入模式下的快捷键](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_insert_mode_keybindings)
 
+如果你在插入模式下想执行一个普通模式的动作，执行完后立即再次返回插入模式，可以用 Control-o 命令。执行一个普通模式的命令后，你会立即回到插入模式。我觉得这个功能意义不大，因为 Control-o + <命令> 需要按两次键，而 <Escape> + <命令>i 也差不多。
 
+在插入模式下，按 Control-a 会插入你在上一次插入模式中输入的文本。这类似于访问 ". 寄存器。
 
+要在插入模式下访问其他寄存器，可以使用 Control-r。这会弹出寄存器菜单，你可以按相应的键来插入相应寄存器中的内容。所以插入模式下的 Control-a 类似于 Control-r + . 命令。若要将系统默认剪贴板的内容插入，用 Control-r 然后按 +。
 
+Control-u 快捷键会删除：自进入插入模式以来,**"当前行"**中添加的所有字符。所以在单行编辑中，它类似于撤销操作，但如果你的插入包含了 <Enter>，那么"撤销"只会作用于当前行。
 
+有些人喜欢在插入模式下，将一些不常用的字符序列绑定成命令。最常见到的建议，是把 jk 绑定到 Escape，或者把 ;; 绑定到 Control-o，你可以使用任何你喜欢的组合。前者让你不用按 Escape 或 Control 就能切换到普通模式，后者让你可以临时执行一个普通模式的操作，并返回插入模式。就按键次数而言它们并不会节省多少，但就方便而言，这些键更容易按！
 
+如果你想尝试这个，打开你的 keymaps.lua 文件并添加以下行：
 
+```lua
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Normal mode" })
+vim.keymap.set("i", ";;", "<C-o>", { desc = "Normal mode single operation" })
+```
+
+这里要注意的是第一个参数 "i"。这告诉 Neovim 此键位映射应该在插入模式而不是在普通模式（"n"）下生效。你也可以用 "o" 来表示操作符待决模式，用 "v" 表示可视选择模式，等等。
+
+> 在普通文本和代码编辑中，除了 <Space> 或 <Enter>，"**;**" 后面很少跟其他的字符。所以，用它来当作插入模式下的快捷键前缀是一个不错的选择。 
+
+不过，不要用这种技术来实现代码补全，如下为不建议的示例：
+
+```lua
+vim.keymap.set("i", "for;", "for (int i = 0; i < n; i++) {}", { desc = "for loop" })
+```
+
+对于这个需求，最好使用abbreviations（缩略语）或代码片段，这是接下来两节的主题。
+
+## [14.10. 缩略语（和文件类型配置）](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_abbreviations_and_filetype_configuration)
+
+Vim 的"缩略语"功能在很早的时期就存在了。它是一种简单的方法，可以让你在不离开插入模式的情况下，用"快捷词"展开成完全不同的内容。
+
+要创建一个临时的缩略语，只需使用命令 :iabbr <快捷词> <展开内容>。你可以将 Vim 的"键位绑定语法"，应用在 <展开内容> 中，来表示特殊的字符（或动作），如 <Enter> 和 <Tab>，你甚至可以用 <Left> 这样的命令来重新定位光标位置。比如，考虑这个命令：
+
+```lua
+:iabbr ifmain if __name__ == "__main__":<Enter>main()<Left>
+```
+
+它会在插入模式下，把文本 ifmain<Space> 展开成以下内容，并把光标放在 main 后的括号内：
+
+```python
+if __name__ == "__main__":
+    main( )
+```
+
+iabbr 中的 i 表示它会在插入模式下工作，abbr 是 abbreviate（缩略语）的简写。
+
+注意：我不需要在 <Enter> 后显式的添加缩进。因为 Python 的缩进引擎会自动的处理。还要注意：我在 ifmain 后输入的 <Space> 被插入到了括号之间。因为展开的过程为：
+
+1. 输入 ifmain<Space>
+2. 展开成 if __name__ == "__main__":<Enter>main()
+3. 执行 <Left> 移动到括号内
+4. 触发展开动作的空格，被插入到光标位置（也就是 <Left> 移动到的位置：main() 的括号内）
+
+如果你需要展开缩写但不想添加空格，可以使用 Control-] 快捷键来触发展开。
+
+如果你需要插入 ifmain 这些词而不想展开它们，输入 ifmain + <Escape> 返回到普通模式即可。
+
+这个缩略语只会存在到我关闭编辑器为止。要让它永久生效，需要把它添加到 LazyVim 配置中。通常，缩写只在单个文件类型的上下文中有意义，所以我在 autocmds.lua 中用这样的语法收集它们：
+
+```lua
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "python" },
+  callback = function()
+    vim.cmd('iabbr ifmain if __name__ == "__main__":<Enter>main()<Left>')
+    vim.cmd("iabbr frang for i in range():<Enter><Esc>F(a")
+    -- 其他的 Python 缩略语
+  end,
+})
+```
+
+frang 缩写展示了另一个巧妙的技巧：你可以用字符串 <Esc> 来进入普通模式并移动光标。我用 F( 命令来找到前面的左括号，然后用 a 在 range() 的括号内进入插入模式。
+
+Vim 的缩略语功能已经存在很久了，而且工作得很好。我仍在使用它们（可能因为我比较老派），但现在流行的做法已经转向使用代码片段（Snippets）了。
+
+## [14.11. Snippets（代码片段）](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_snippets)
+
+LazyVim 自带 blink.cmp 插件，它提供了高速补全界面。除了补全功能外，它还连接到 Neovim 0.10 的内置"代码片段"功能。可以加载出 [VS Code](https://code.visualstudio.com/docs/editor/userdefinedsnippets#_create-your-own-snippets) 风格的代码片段界面。
+
+默认情况下，blink.nvim 会在你输入时弹出一个简单的菜单，显示出一系列的补全选项。比如，我在 Python 文件中输入 if，会看到这样的界面：
+
+<img src="mymedia\blink-cmp-dark.png" alt="blink cmp dark" style="zoom:50%;" />
+
+列表会显示出可能的补全选项。我可以用方向键在列表中上下移动光标（这里不能用 j 和 k，因为我仍在插入模式）。大多数的补全选项都会弹出一个预览框，显示出文档或补全的示例。
+
+这个代码片段是由 FriendlySnippets 插件创建的。这是一个随 LazyVim 一起提供的"庞大的实用代码片段集合"。
+
+我可以按下 Control-y 键来确认补全（或者使用 Enter 键），代码片段就会插入到编辑器中：
+
+<img src="mymedia\snippet-inserted-dark.png" alt="snippet inserted dark" style="zoom:50%;" />
+
+要注意的是：编辑器现在处于"选择模式"。这是一个不常见的模式，它表面上类似于可视模式。据我所知，在 LazyVim 的默认配置中，除了代码片段场景外，没有其他方法可以进入选择模式！所以我们不会在代码片段上下文之外详细讨论这个模式。
+
+这个模式的关键点是："condition"当前被高亮显示，我可以立即开始输入来覆盖它，几乎就像在插入模式一样。一旦"condition"被新的输入覆盖，我可以按 <Tab> 键，在选择模式下，这意味着"跳转到代码片段中的下一个字段"，即 pass 字段！
+
+<Tab> 键只有在 snippets 知道它"在一个有字段的代码片段"中时才会这样工作。
+
+### [14.11.1. 自定义代码片段](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_defining_new_snippets)
+
+如果 FriendlySnippets 的代码片段不能满足你的需求，你可以使用现在无处不在的 VS Code 代码片段语法自定义代码片段，并在 snippets 中加载它们。这里有一个快速示例，展示如何为 Svelte 组件创建一个样板代码片段：
+
+1. 创建 ~/.config/nvim/snippets/ 目录来存放你的代码片段。这是 blink.cmp 默认查找代码片段的位置。
+
+2. 创建 ~/.config/nvim/snippets/package.json 文件。它起到了一个"目录表"的作用，记录着每个语言和其对应的代码片段文件。在这个例子中，我们将添加 svelte 的代码片段：
+
+   ```json
+   {
+     "name": "personal-snippets",
+     "contributes": {
+       "snippets": [
+         { "language": "svelte", "path": "./svelte.json" }
+       ]
+     }
+   }
+   ```
+
+   若不确定某个语言的类型是什么，可以打开该文件，并在命令模式中输入 set ft，即可显示这个语言的类型，比如：
+
+<img src="mymedia\language-type.png" alt="image-20241228201210447" style="zoom:50%;" />
+
+3. 创建"path"中的文件，即 svelte.json。给它以下内容：
+
+   ```json
+   {
+     "Boilerplate Component": {
+       "prefix": "scri",
+       "description": "Basic svelte boilerplate",
+       "body": [
+         "script lang=\"ts\">",
+         "  $1",
+         "</script>",
+         "",
+         "${2:<div></div>}",
+         "",
+         "<style>",
+         "  $3",
+         "</style>"
+       ]
+     }
+   }
+   ```
+
+如果你不熟悉 VS Code 的代码片段语法，如下为示例的解释：
+
+- prefix 是你在插入模式下，用来触发代码片段的字符串。在这个例子中是 scri。
+- description 是在预览窗格中描述它的字符串。
+- body 是定义代码片段实际内容的地方。它是一个字符串数组，每个数组元素代表一行代码。当触发代码片段时，这些行会按顺序插入到编辑器中。
+- $1、${2:<div></div>}、$3 代表代码片段中的"跳转点"。
+- ${2:<div></div>} 表示一个带有默认内容的跳转点，内容可以被覆盖，或者按 <Tab> 跳过它（即使用默认内容：<div></div>）。
+
+## [14.12. 总结](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-14/#_summary_14)
+
+本章介绍了各种编辑技巧，从字数统计和字符转置开始，然后讨论了注释管理、缩进和格式化。
+
+最后，我们介绍了古老但依然实用的缩略语功能，以及 LazyVim 自带的新式代码片段引擎。
+
+在下一章中，我们将讨论一个完全不同的主题：LazyVim 中的版本控制。
 
 
 

@@ -65,4 +65,12 @@
 
 - Ripgrep 本身接受很多命令行选项，但默认情况下，live_grep 功能不支持传递参数给 ripgrep 来调整你的查询。如果你想成为 live_grep 高级用户，Telescope 项目提供了一个 telescope-live-grep-args 扩展可以启用。在第 19 章会介绍如何配置这个扩展，这是 LazyVim 的抽象偶尔会妨碍使用的一个典型例子。
 
-- 
+
+
+Todo list：
+
+- grep（root、cmd）
+- find file（root、cmd）
+- telescop 的布局（左右）
+- multi cursor 插件
+- hight-light 取消全部、取消光标中选中的、快捷键。。。
