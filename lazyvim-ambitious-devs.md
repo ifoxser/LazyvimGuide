@@ -3854,85 +3854,513 @@ LazyVim 自带 blink.cmp 插件，它提供了高速补全界面。除了补全�
 
 在下一章中，我们将讨论一个完全不同的主题：LazyVim 中的版本控制。
 
+# [第15章：源码控制](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_source_control)
 
+LazyVim 内置了多种源码控制的功能，同时你还可以使用一些优秀的第三方插件。这些插件中，有些支持多种版本控制软件（比如 svn 等），有些则专注于 git。在这本书中，我们假设你使用的是 git。
 
+## [15.1. 内置终端（加一点吐槽）](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_the_integrated_terminal_a_rant)
 
+说实话，我真的无法理解为什么 Neovim 要内置一个终端模拟器。想想看，一个运行在终端中的编辑器居然还自带终端，这不是很奇怪吗？这样的设计甚至可以让你：打开一个终端，然后打开 Neovim，再在 Neovim 中打开终端，最后在这个终端中再次打开 Neovim。
 
+如果你想把事情搞得更复杂，你还可以在这些终端中嵌套使用 ssh 连接。
 
+说实话，我并不需要编辑器里的终端。我已经有了一个很棒的终端了。当我需要新的终端窗口时，我只需要使用 Kitty 的分屏、标签页和窗口功能就够了。通过 smart-splits 插件，我可以在编辑器和终端之间无缝切换，而且 Kitty 甚至可以在 ssh 连接时自动安装自己。
 
+其实还有一个比较传统的访问终端的方式，那就是按 Control-z。可惜这个快捷键现在不那么流行了。按 Control-z 会"挂起" Neovim。如果你不了解这个功能，可能会以为编辑器在没有保存的情况下关闭了，因为窗口消失了，你回到了终端界面。
 
+别担心！编辑器只是被挂起了，你可以在输出中看到 'nvim' has stopped 这样的提示：
 
+<img src="mymedia\suspended-neovim-dark.png" alt="suspended neovim dark" style="zoom:50%;" />
 
+如这个截图所示，你可以在任何 shell 中使用 jobs 命令查看已停止（或正在运行）的后台任务列表。使用 fg（foreground 的缩写）命令可以重新启动被挂起的 Neovim 进程。如果你有多个挂起的任务，可以使用 fg %# 命令来选择特定的任务 ID（例如，fg %1 会运行 Job ID 为 1 的任务）运行至前台。
 
+这个功能并不是 Neovim 独有的。Control-z 这个技巧适用于（几乎）所有长时间运行的 shell 命令。你甚至可以使用 bg 命令（而不是 fg）让挂起的任务在后台继续运行（不过如果后台的任务输出内容到 stdout，可能会让你感到困惑）。
 
+有了终端分屏和 Control-z，编辑器根本不需要内置终端。但既然 Neovim 已经内置了终端，我想我还是应该解释一下如何使用它。
 
+## [15.2. 内置终端（这次是正经的）](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_the_integrated_terminal_for_real_this_time)
 
+在 LazyVim 中，你可以随时使用 Control-/ 快捷键打开终端。终端会显示在所有编辑器窗口的前面（除非你启用了 Edgy 扩展，这种情况下终端会显示在编辑器的下半部分）。再次按 Control-/ 可以关闭终端。
 
+Neovim 的终端窗口是一个"特别的终端"和"Vim 窗口"的混合体。
 
+然而，与文本编辑的插入模式不同，按 Escape 键并不会让你进入普通模式，尽管你的手指可能已经习惯性地按 Escape 键了。这样的设计其实是有道理的，因为在很多的终端程序中，也有可能会要用到 Escape 键，如果 Neovim 占用了这个键就不合理了。LazyVim 设置了快速按两下 Escape 键（<Escape><Escape>）来从终端模式切换到普通模式，或者你也可以使用默认的但不太好按的组合键：<Control> + \ + n。
 
+进入普通模式后，你可以使用任何导航键（包括查找和搜索模式）在终端窗口中移动。如果你需要复制一些终端的输出文本到剪贴板，这个功能就很有用。
 
+按下 a 或 i 键会让你回到"终端模式"，在这个模式下，你的每个按键都会直接发送给终端中正在运行的程序（通常是你的 shell）。
 
+> 如果你想在命令行中使用 Vim 的 Normal 模式进行编辑（这适用于所有终端，不只是 Neovim 内的终端），你可以配置你的 shell 使用"Vi 模式"，现代的很多 shell 都支持这种模式。在这种模式下，你可以用 Escape 键进入一个类 Vim 的 Normal 模式。这样你就可以使用 w 和 b 这样的命令来导航，以及使用 d 和 c 这样的基本命令来编辑命令行。
 
+虽然有一些第三方插件试图让 neovim 中的终端体验更加一致和愉快，但在我看来，这些都不太值得费心。我只需要按 cmd-enter 就能打开一个新的 Kitty 终端面板，获得完全正常的终端体验。
 
+## [15.3. 检查你的 Git 状态](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_checking_your_git_status)
 
+LazyVim 预先配置了一些精心设置的插件，这些插件能让你的版本控制工作变得更加轻松。
 
+其中最简单的一个功能是使用文件选择器列出：自上次提交以来发生变化的文件。这个功能的操作方式与其他文件选择器操作类似，但它只会列出在 git 中有修改的文件。
 
+你可以用 <Space>gs 打开它。我经常用它在当前正在开发的文件之间切换。实际上我更喜欢用它，而不是在第 9 章中讨论过的缓冲区选择器（那个只是显示已打开的文件）。
 
+这张 Fzf.lua 的截图，显示了自上次提交以来修改过的两个文件：
 
+<img src="mymedia\fzf-gitstatus-dark.png" alt="fzf gitstatus dark" style="zoom:50%;" />
 
+> 提示：可以安装 delta-pager 命令行工具，以获得更漂亮、更直观的差异显示。
 
+预览窗格显示了我添加、删除的差异。在左侧，你可以看到我选中了 page.svx 文件，右侧则显示了该文件中的一些更改预览。
 
+需要特别注意的是结果窗格中的 + 和 - 列。这些符号可能会让人困惑，因为它们并不直接反映文件或文件的内容是被添加还是删除。实际上：
 
+- **+** 列显示的是暂存区的文件状态。即当你执行 git add 后,文件状态会出现在 + 列。
+- **-** 列显示的是工作区的文件状态。即当你新建、修改了一个文件，但还没有执行 git add 时，这些改动的文件就会显示在 - 列。
 
+这些列上又会显示不同的符号，表示每个文件的 git 状态，它们的含义可能很难记住。不过符号本身很直观：
 
+- **~** 表示该文件被修改。
+- **-** 表示该文件被删除。
+- **?** 表示这是一个未跟踪的新文件。
+- **+** 表示这是一个已跟踪的新文件。
 
+如果符号出现在第一列，表示该文件已经暂存。如果出现在第二列，则表示该文件尚未暂存。如果 ~ 同时出现在两列中，说明文件的某些部分已暂存，而其他部分尚未暂存。
 
+除了让你有效地查看 git 状态外，这个选择器还允许你（操作）暂存整个文件。要暂存（即：git add）文件，选中该文件并按 <Left> 键（即左箭头键）将其移到"已暂存"列。要取消暂存（即：git restore --staged），使用 <Right> 键（即右箭头键）。如果你想丢弃（即：git restore）文件中的所有更改，使用 <Control-x>。
 
+> 取消暂存（即：git restore --staged）和丢弃更改（即：git restore）的区别：
+>
+> **取消暂存：**git restore --staged <文件> 
+>
+> - 作用区域：**暂存区** → **工作区**
+> - 效果：将文件从暂存区移回工作区
+> - 你的修改内容**不会丢失**
+> - 相当于撤销 git add 的操作
+>
+> **丢弃更改：**git restore <文件> 
+>
+> - 作用区域：**工作区** → **版本库**
+> - 效果：将文件恢复到最后一次提交的状态
+> - 你的修改内容**会丢失**
+> - 这是个不可逆操作
 
+### [15.3.1. 其他的 Pickers](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_other_pickers)
 
+Fzf.lua 还提供了"提交历史"的**选择器**（<Space>gc），它类似于日志浏览器，还有用于切换分支的**选择器**。后者出于某些原因默认没有设置快捷键，但如果你喜欢用"选择器"来完成这个任务，可以为 :FzfLua git_branches 绑定一个快捷键。
 
+你可以通过 :FzfLua 来显示所有已安装的"选择器"列表，然后输入 git 筛选出 git 相关的"选择器"。
 
+## [15.4. Neo-tree 中的 Git 文件](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_git_files_in_neo_tree)
 
+Neo-tree 也有一个 Git 状态查看器。你可以用 <Space>ge 打开它，其中 e 表示"explore"（浏览）。它的优点是可以在文件夹层次结构中显示所有变更的文件。这里有上一个例子中相同的两个文件在 Neo-tree 中的显示效果：
 
+<img src="mymedia\neotree-gitstatus-dark.png" alt="neotree gitstatus dark" style="zoom:50%;" />
 
+在 Neo-tree 中，要暂存和取消暂存文件，将光标移到对应的行上使用 ga（git add）和 gu（git unstage）。此外，快捷键 A 会暂存所有未暂存的文件。
+
+你也可以用 gc 来提交当前状态。这会弹出一个简陋的文本输入窗口，完全不适合输入正常长度的提交信息，所以我建议避免使用它。
+
+使用 gp 可以将当前分支推送到远程仓库。我建议使用后面将要讨论的 lazygit 集成，但如果你经常使用 Neo-tree，这些命令也是可用的。
+
+## [15.5. 当前焦点文件的状态](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_status_of_the_currently_focused_file)
+
+每个缓冲区都有一些细微的"变更指示"。看这个截图：
+
+<img src="mymedia\git-signs-dark.png" alt="git signs dark" style="zoom:50%;" />
+
+注意左侧边栏，在行号右侧。它包含一个绿色条、一个红色三角形和一个橙色条。这些指示器分别表示这些行被添加、删除和修改。
+
+此外，在状态栏中，文件进度指示器的左侧，我们可以看到这些图标，它们总结了相同的信息：
+
+<img src="mymedia\git-statusbar-dark.png" alt="git statusbar dark" style="zoom:50%;" />
+
+## [15.6. 从编辑器中暂存](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_staging_from_the_editor)
+
+你可以直接从编辑器中将文件添加到 git 的索引（使其准备好提交）。在 <Space>gh 菜单（助记符是"git hunks"）中，有很多有趣的子命令：
+
+<img src="mymedia\hunks-menu-dark.png" alt="hunks menu dark" style="zoom:50%;" />
+
+你可以使用 <Space>ghS 暂存整个文件。
+
+如果你想暂存一个文件中的部分内容，可以导航到你想暂存的代码块（可以使用 [h 和 ]h），并按 <Space>ghs。
+
+> （ethan）具体来说：
+>
+> 1. hunk 是文件中发生更改的连续区域。
+> 2. 一个文件可以包含多个 hunk。
+> 3. hunk 不是 git 特有的概念。这种差异展示方式是 Unix diff 工具发明的，后来成为了标准。
+>
+> 举个例子：
+>
+> ```git
+> # 这是第一个 hunk
+> @@ -10,12 +10,13 @@
+> - 这是原来的文字
+> + 这是修改后的文字
+> 
+> # 这是第二个 hunk
+> @@ -25,27 +25,28 @@
+> - 这里删除了一行
+> + 这里添加了新内容
+> + 还加了另一行
+> ```
+>
+> hunk 的使用场景：当你在同一个文件中同时进行多个不相关的修改，想把这些不同的修改分开提交，使得每个提交都更有意义。
+>
+> 不分场景的将整个文件全部提交，并不是一个好习惯。但如果你是少数的正确使用 git 的人之一（请成为这样的人），你会经常使用 <Space>ghs 命令。
+
+你可以用 <Space>ghr 来重置单个代码块（hunk），将其恢复到暂存区的状态。如果需要重置整个文件，可以使用"更大范围"的命令：<Space>ghR（就相当于你对这个文件执行了：git restore <file> 命令）。这些重置操作会直接修改文件内容，请谨慎使用（不过通常可以按 u 键来撤销操作）。
+
+> （ethan）如下为 **git restore <file>** 和 **git restore --source=HEAD <file>** 的区别。前者是将暂存区的内容恢复到工作区，后者是将上一次的提交内容恢复到工作区。
+>
+> ```mermaid
+> graph LR
+>  %% 定义三个存储区
+>  R[(本地仓库<br>HEAD)] 
+>  S[(暂存区<br>Index)]
+>  W[(工作区<br>Working Dir)]
+> 
+>  %% 定义基本的 git add/commit 流向
+>  W -->|git add| S
+>  S -->|git commit| R
+> 
+>  %% git restore 的两种主要用法
+>  S --->|"git restore <file>"<br>默认行为| W
+>  R .->|"git restore --source=HEAD <file>"<br>指定来源| W
+> 
+>  %% 样式
+>  style R fill:#d4ffdd,stroke:#333
+>  style S fill:#d4e5ff,stroke:#333
+>  style W fill:#ffe6f9,stroke:#333
+> ```
+> 不过，基于 <Space>ghR 这个名字：Gitsigns reset*_buffer，我合理怀疑，当初作者设计插件时，是受到了传统 git checkout 命令的影响。因为：
+>
+> 1. git restore 是在 Git 2.23.0（2019年）才引入的相对较新的命令（而这个插件存在的时间更早）。
+> 2. 在这之前，开发者都是使用 git checkout -- <file> 来重置文件。
+> 3. 而 git checkout -- <file> 的行为确实是将文件恢复到最后一次提交的状态（相当于现在的 git restore --source=HEAD <file>）。
+> 4. 这也解释了为什么这个功能被命名为 "reset_*buffer" 而不是 "restore*_buffer"。
+> 
+> 所以这里可能存在一个有趣的历史遗留问题：命令的实际行为（git restore）和命名（reset_*buffer）反映了不同的 Git 历史阶段。这提醒我们在使用这类命令时，最好先验证其具体行为，而不是仅依赖命令名称来判断。
+
+如果你不小心暂存了一个代码块，想取消暂存的话，可以使用 <Space>ghu 取消暂存。与重置不同，**这个操作不会改变文件内容**；更改仍然存在，只是不再被暂存了。
+
+## [15.7. Git 信息快捷键](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_git_information_keybindings)
+
+blame line 命令（<Space>ghb）可以将光标所在行的最后一次提交信息（git commit）显示出来，想要退出显示，只需将光标导航到其他处即可。这对回答"这行代码当时为什么要这么做"很有帮助：
+
+<img src="mymedia\git-hunk-blame-line.png" alt="image-20250101151929776" style="zoom:67%;" />
+
+> （ethan）blame line 命令（<Space>ghb）对应于 git 的命令：
+>
+> 1. git blame -L <行号>,<行号> <文件> 
+> 2. 获取这行的 commit-hash
+> 3. git show -U0 <commit-hash> -- <文件路径>
+> 4. 找到想 blame 的行号，获取该行上的改动
+
+预览代码块命令（<Space>ghp）会临时显示代码块的原始版本和修改版本（一个在上一个在下），这样你就能准确看到具体改动了什么。比如：
+
+<img src="mymedia\git-hunk-preview.png" alt="image-20250101011608677" style="zoom:67%;" />
+
+> （ethan）预览代码块命令（<Space>ghp）对应于 git 的命令：
+>
+> 1. git diff -U0 HEAD <file>
+> 2. 找到想 diff 的行号，获取该行上的改动内容
+
+Diff this 命令（<Space>ghd 和 <Space>ghD）做同样的事情，但是使用并排视图显示，我们将在本章后面详细的讨论这个。
+
+就我个人而言，我经常使用这些命令，以至于觉得需要按这么多按键才能调出它们有点麻烦。所以我在 plugins 目录下创建了一个 extend-gitsigns.lua 文件，将这些命令从 <Space>gh 映射为 <Space>h：
+
+```lua
+return {
+  "lewis6991/gitsigns.nvim",
+  keys = {
+    {
+      "<leader>hb",
+      "<cmd>Gitsigns blame_line<cr>",
+      desc = "Blame Line"
+    },
+    {
+      "<leader>hs",
+      "<cmd>Gitsigns stage_hunk<cr>",
+      desc = "Stage Hunk"
+    },
+    {
+      "<leader>hS",
+      "<cmd>Gitsigns stage_buffer<cr>",
+      desc = "Stage Buffer"
+    },
+    {
+      "<leader>hr",
+      "<cmd>Gitsigns reset_hunk<cr>",
+      desc = "Reset Hunk"
+    },
+    {
+      "<leader>hR",
+      "<cmd>Gitsigns reset_buffer<cr>",
+      desc = "Reset Buffer"
+    },
+    {
+      "<leader>hu",
+      "<cmd>Gitsigns undo_stage_hunk<cr>",
+      desc = "Undo Stage Hunk"
+    },
+    {
+      "<leader>hd",
+      '<cmd>lua require"gitsigns".diffthis()<CR>',
+      desc = "Diff This",
+    },
+    {
+      "<leader>hD",
+      '<cmd>lua require"gitsigns".diffthis("~")<CR>',
+      desc = "Diff This~",
+    },
+  },
+}
+```
 
+这些内容是我从 LazyVim 官网上的 git-signs 配置中复制后，再将 map 调用转换为 keys = 格式。
 
+## [15.8. Lazygit](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_lazygit)
 
+Lazygit（尽管与 LazyVim 和 Lazy.nvim 共享 "Lazy" 命名，但实际上是由完全不同的开发者开发的）是一个用于与 git 交互的终端 UI 工具。如果你想使用它，需要通过包管理器单独安装（比如 brew install lazygit）。
 
+LazyVim 预先配置了使用快捷键 <Space>gg 在终端窗口中显示 lazygit。我不会详细的介绍如何使用这个第三方程序。它几乎可以做任何 git 命令行能做的事情，而且界面更加用户友好。
 
+Lazygit 需要一些时间来熟悉，但它有帮助菜单和快捷键助记符，所以学习曲线相对平缓。
 
+有趣的是，在使用 LazyVim 之前，我（在命令行中）就已经频繁的使用 lazygit 了。但是现在，我已经改用到刚才讨论过的 <Space>h 菜单。
 
+现在，我大部分 git 工作都是用的 [Graphite](https://graphite.dev/) 工具，它简化了我过去使用 lazygit 的许多工作流程（特别是 rebasing）。我现在仍然使用 lazygit，只是频率少了很多。
 
+## [15.9. Diff 模式](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_diff_mode)
 
+Neovim 自带一个功能强大但稍难掌握的 Diff 查看模式。它可以并排显示文件"修改前"和"修改后"的对比，甚至可以配置显示"父版本"和"变更状态"。
 
+**打开 Diff 模式：**
 
+有几种不同的方式可以进入 Diff 模式。最基础的方式是：在命令行打开两个文件时指定：
 
+```shell
+nvim -d file1 file2
+```
 
+这会在 Diff 视图中并排打开指定的文件。但在 Git 管理的开发场景中，你可能想要查看的是，当前文件与暂存区之间的差异，这可以通过快捷键 <Space>ghd 完成。或者使用 <Space>ghD 来显示当前文件与最后一次提交之间的差异。
 
+使用这些命令后，会打开一个右侧为"工作区"、左侧为"暂存区"/"仓库区"的视图：
 
+<img src="mymedia\git-diff.png" alt="image-20241229221428986" style="zoom:50%;" />
 
+**关闭 Diff 模式：**
 
+一旦你进入 Diff 模式，想要回到之前的模式可能会有点棘手。当你进入 Diff 视图，并排预览差异时，即使关闭 buffer（close current buffer），它也会保持这种窗口布局。所以你需要按照这样的步骤来关闭 Diff 模式：
 
+1. 将光标移动到左侧的 Diff buffer（"暂存区"/"仓库区"）。
 
+2. 关闭当前窗口（<Control-w>q）。
 
+<img src="mymedia\close-git-diff.png" alt="image-20241229223937126" style="zoom:50%;" />
 
+> 相关命令：
+>
+> - 命令模式中输入 diffoff，它会为当前缓冲区禁用"Diff 视图"。
+> - <Space>bd（Delete buffer）。
+> - <Control-w>q（Quit a window）。
 
+还有一点需要说明的是，默认情况下，diff 视图会将两个文件中相同的代码折叠成一个折叠区。使用代码展开命令 zo 可以将其展开。
 
+### [15.9.1. 编辑 Diffs](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_editing_diffs)
 
+编辑 Diff 之前，我们先介绍一下如何在"差异块"之间跳转，这很重要。因为 <Space>ghs、<Space>ghr、<Space>ghu 命令都是基于"差异块"来工作的，若你直接使用 jkhl 来导航，很有可能将光标移动到非"差异块"上，从而导致这些命令出现未知的错误，如下为"差异块"之间跳转方式：
 
+在 Diff 模式中，**[h 和 ]h**、**[c 和 ]c** 都可以在更改的"差异块"之间跳转（c 可以助记为 "change"）。其中[c 和 ]c 需要特殊说明一下（可以参考 Lazyvim 的配置说明：[gitsigns](https://www.lazyvim.org/plugins/editor#gitsignsnvim)）：
 
+- 普通模式中，[c 和 ]c 表示在类或类型之间跳转（前面的章节有说明）；[h 和 ]h 在 hunk 间跳转。
+- Diff 模式中，[h 和 ]h 和 [c 和 ]c 都可以在 hunk 间跳转。
 
+当你使用 <Space>ghd 命令来查看当前文件（工作区）与暂存区的 Diff 视图后，你可以继续**编辑**右侧的文件（工作区）进行修改。
 
+> （ethan）一般不在 <Space>ghD 命令后编辑 Diffs，原因是：
+>
+> 1. <Space>ghD 命令比较的是仓库区(HEAD)和工作区的差异，主要用于预览变更，而不适合编辑场景：
+>    - 仓库区的更改需要通过正式的 commit 流程，不能直接修改。
+>    - 在此视图下使用 stage/unstage 命令的效果有限，无法提供良好的视觉反馈。
+> 2. 从 Git 工作流程来看，<Space>ghd 更适合日常开发：
+>    - 开发过程中最频繁的操作是在"工作区 ↔ 暂存区"之间。
+>    - 所有操作都是可逆的，可以通过 stage/unstage 随时调整。
+>    - 任何编辑或暂存操作都能在两侧视图中获得即时的视觉反馈。
 
+如前面说明的，右侧是"工作区"文件，左侧是"暂存区"文件。在 Lazyvim 中，并没有直接禁止编辑暂存区文件，但这样做会混淆 Diff 模式的机制，所以请遵守从右侧进行编辑。
 
+如果你想"编辑"左侧的文件，可以在右侧使用 <Space>ghs、<Space>ghr 和 <Space>ghu 来暂存、重置、取消暂存，以达到间接的"编辑"左侧文件。
 
+当使用 Diff 视图时，我发现暂存、重置、取消暂存，这些快捷方式挺符合我的思维模式。然而，Neovim 还内置了两个有点奇怪的命令，你可能偶尔需要用到，他们分别是 :diffget 和 :diffput。这些命令的简写形式是 :diffg 和 :diffp，可以节省几次按键。
 
+这些命令常用于可视模式（或者带上范围），它们本质上意味着（在某个范围内）：让这个文件与另一个文件相同，或让另一个文件与这个文件相同。考虑这两个略有不同的文件：
 
+<img src="mymedia\diff-mode-dark.png" alt="diff mode dark" style="zoom:50%;" />
 
+- Diff1：暂存的文件中缺少单词"Two"，我在工作区添加了它。
+- Diff2：暂存的文件多了"Four Point Five"行，我在工作区删除了它。
+- Diff3：暂存的文件中，单词 Six 拼写错了，我在工作区修改了它。
 
+基于以上的场景，我们来学习几种使用 :diffg 和 :diffp 的方法。 
 
+虽然你可以在任意一侧的文件上使用这些命令，但通常，你只要在一侧的文件上处理即可。在以下的例子中，假设我都在右侧（工作区）处理。
 
+- Diff1：若我想暂存工作区的"Two"，我可以在"Two"行上输入 :diffp，这意味着"让这个文件与另一个文件相同"。
+- Diff2：若我想将已暂存的"Four Point Five"取消掉，也就是说"让右侧文件与左侧文件相同"。要从右侧窗口做到这一点，我可以使用 Shift-V 进入可视行模式，选择包含 Four 和 Five 的行以及这两行之间代表已删除的空白红色区域，接着再输入 :diffg 或 :diffget。这意味着"获取另一个窗口的内容并使我的窗口与之匹配"。（由于 :diffget 和 :diffput 接受范围参数，所以 '< 和 '> 可以传递给他们）
+- Diff3：...
 
+如果你习惯使用上述 Diff 界面，但对于：找出项目中所有的差异文件，感到繁琐（虽然可以使用 fzf 的选择器命令 <Space>gs），那你可以配置 [diffview.nvim](https://github.com/sindrets/diffview.nvim) 插件，它有一个很友好的界面，可以同时看到所有的差异文件，并方便的查看这些文件差异。
+
+## [15.10. 将 Vim Diff 配置为合并工具](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_configuring_vim_diff_as_merge_tool)
+
+很多人都讨厌解决合并冲突。不过对我来说，有了 Diff 模式和 rebase 功能，这个过程反而变得有点享受。诀窍就是配置一个稍微复杂点的 ~/.gitconfig 文件（当然，还需要一个够大的显示器）。
+
+显示器的问题我帮不了你，但是 .gitconfig 文件可以这样配置：
+
+```ini
+[diff]
+    tool = vimdiff
+[merge]
+    tool = vimdiff
+    conflictstyle = zdiff3
+[mergetool "vimdiff"]
+    cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED \
+          -c '$wincmd w' -c 'wincmd J'
+```
+
+把"冲突样式"配置成"zdiff3"，这样可以自动处理相同的代码行，让 diff 的结果更容易阅读。[diff] 和 [merge] 中的"tool ="配置，指定 Git 使用最后一行配置的 vimdiff 作为合并工具。
+
+最后一行的命令会打开 Neovim，并创建四个窗口，然后自动聚焦到合适的窗口中。
+
+为了演示这个过程，我创建了一个新的 Git 仓库，里面有两个分支，它们之间有冲突的修改。当我尝试把一个分支 rebase 到另一个分支上时（我一般使用 rebase 而不是 merge commit，因为这样可以独立处理每个变更带来的冲突。这也是为什么对我来说，每个 commit 只包含一种改动很重要！），果然出现了这个错误：
+
+```shell
+✦ ❯ git rebase main
+Auto-merging file
+CONFLICT (content): Merge conflict in file
+error: could not apply f611b6f... Uppercase
+Could not apply f611b6f... Uppercase
+```
+
+要解决这个冲突，我们需要运行 git mergetool。因为前面的 Git 配置，它会打开 Neovim 并显示四个不同的 diff 窗口：
+
+<img src="mymedia\mergetool-dark.png" alt="mergetool dark" style="zoom:50%;" />
+
+上面是三个并排的窗口，下面是一个大窗口（也是最痛苦的地方）。
+
+**左上角窗口：**显示"本地（local）"的改动。"本地"的具体含义取决于你是如何进入冲突状态的。在典型的 rebase 流程中，它通常表示"main 分支的当前状态"。所以当发生冲突时，这里其实包含的是"其他人的改动"，所以叫"本地"反而有点不太准确。
+
+**中间窗口：**显示改动的"共同祖先"或"基础（base）"版本。也就是说，这是在你或"其他人"做出任何改动之前的文件状态。很多合并工具教程都不会提到这个窗口，但我觉得它对于理解：基础版本与两侧窗口的变化对比时很有帮助。
+
+**右上角窗口：**显示"远程（Remote）"的改动，这个名字和"本地"一样可能会产生误解。在 rebase 流程中，它通常指"我在要 rebase 到 main 分支上时所做的改动"。
+
+**底部窗口：**显示"文件的当前状态"，在 rebase 失败时会包含混乱的冲突标记。这是唯一一个你应该进行编辑的文件。
+
+如果有很长的相同代码段，这四个文件都会使用代码折叠功能。另外，当你在下面的文件中滚动或移动光标时，上面的文件也会同步滚动，保持对齐。上面三个窗口中会有一条下划线，表示 diff 工具认为这是相对于下面窗口光标位置的"当前行"。
+
+大多数 rebase（解决冲突）流程都是：
+
+1. 先用 vag + :%diffg N 选择一个基础版本。即让底部窗口的内容和上面某个窗口的内容一致。
+2. 然后通过 :diffg N 来选择性的逐个获取差异块进行合并。
+3. 最后手动编辑需要特殊处理的部分。
+
+> （ethan）vag 是一个复合命令，它由两部分组成：v（进入可视模式） + ag（一个文本对象，表示"整个文件"）。所以 vag 的意思是"选择整个文件的内容"。
+
+问题是，由于打开了多个窗口，:diffg 不知道应该从哪个窗口获取内容：
+
+<img src="mymedia\mergetool-buffer-error-dark.png" alt="mergetool buffer error dark" style="zoom:50%;" />
+
+这时我们需要使用命令 :%diffg 2。这里的 2 是缓冲区编号。当你直接从命令行运行 merge-tool 时，缓冲区会按被打开的顺序进行编号。所以 1 是左边的缓冲区，2 是中间的，3 是右边的，4 是下面的窗口。如果你不确定，可以用 <Space> + <comma>（逗号） 快捷键查看缓冲区列表：
+
+<img src="mymedia\mergetool-buffer-numbers-dark.png" alt="mergetool buffer numbers dark" style="zoom:50%;" />
+
+在这个列表中，第一列就是缓冲区编号。这个数字会随着你打开的 buffer 数量增加而递增，所以如果你编辑了一段时间，这个数字可能会很大。但是当你在终端中使用 git mergetool 时，它通常会打开一个全新的 Neovim 实例，编号就会是 1-4。
+
+运行 vag 和 :%diffg 2 命令后，底部窗口会和中间窗口一样，也就是回到了创建任何分支之前的状态。如果用 vag 然后 :%diffg 1，它就会和 main 分支一样；用 vag 后跟 :%diffg 3，就会和"我的分支"一样。然后你就可以查看缓冲区窗口之间的差异，使用 :diffg N 从某个窗口（N）中获取相应的改动。最后，若还有要手动处理的地方，再编辑即可。
+
+合并冲突总是会有点压力，但是我发现用如上的四窗口视图时，通常能更容易理解发生了什么变化、以及为什么会有这些变化。不过说实话，我只有在遇到特别棘手的合并情况时才会用它。平常我都是用 git-conflict.nvim 插件。
+
+## [15.11. Git-conflict.nvim](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_git_conflict_nvim)
+
+虽然 merge-tool 在处理特别复杂的合并时很有用，但对于简单的冲突，我觉得直接编辑带有"冲突标记"的文件会更快。Git-conflict.nvim 这个插件提供了语法高亮和一些快捷键，可以帮助我们更方便地处理冲突。
+
+参考如下的配置（复用之前设置的 <Space>h 前缀（用于暂存代码块）加了一些新的命令）：
+
+```lua
+return {
+  "akinsho/git-conflict.nvim",
+  lazy = false,
+  opts = {
+    default_mappings = {
+      ours = "<leader>ho",
+      theirs = "<leader>ht",
+      none = "<leader>h0",
+      both = "<leader>hb",
+      next = "]x",
+      prev = "[x",
+    },
+  },
+  keys = {
+    {
+      "<leader>gx",
+      "<cmd>GitConflictListQf<cr>",
+      desc = "List Conflicts"
+    },
+    {
+      "<leader>gr",
+      "<cmd>GitConflictRefresh<cr>",
+      desc = "Refresh Conflicts"
+    },
+  },
+}
+```
+
+启用这个插件后，当你打开一个有冲突的文件时，它会用不同的颜色高亮显示"冲突标记"。在我的示例文件中长这样：
+
+<img src="mymedia\git-conflict-dark.png" alt="git conflict dark" style="zoom:50%;" />
+
+"冲突标记"包含了三部分内容：
+
+- 上面是"当前"代码（HEAD，即当前分支的内容）。
+- 中间是原始或基础代码（合并冲突前的原始版本）。
+- 下面是"新"代码（要合并的内容）。
+
+我可以用 ]x 快捷键快速跳转到下一个冲突（这个例子中只有一个冲突）。然后可以用以下快捷键来解决冲突：
+
+- <Space>ho：选择当前分支的版本。
+- <Space>ht：选择要合并进来的版本。
+- <Space>hb：保留两个版本。
+- <Space>h0：回到中间的原始版本。
+
+> o 和 t 这两个快捷键可能不太好记。从技术上讲，它们代表"ours（我们的）"和"theirs（他们的）"，但由于你执行 merge 或 rebase 的顺序不定，它们并不能准确的表示：是自己的提交，还是别人的提交。我是这样记的：在字母表中 o 在 t 之前，所以它对应冲突中上方的改动。当然，你也可以把它们重新映射到更容易记住的快捷键上。
+
+在大多数情况下，你可能还需要手动编辑来让代码正确，这很正常。因为没有哪一个冲突管理插件，可以用 AI 来语义理解这些改动的意图，所以这部分工作还是需要你自己来完成！
+
+大约 90% 的情况，这个插件就足够我解决冲突了。只有在遇到特别棘手或复杂的情况时，我才会使用 mergetool。
+
+## [15.12. 总结](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-15/#_summary_15)
+
+本章介绍了在 LazyVim 中与 git 和版本控制交互的多种方式。你可能不会用到这里的所有功能，但我想全部展示出来，让你可以自己决定使用哪一个。
+
+也许你想使用 Lazygit，或者你更愿意留在编辑器中使用 git-signs 和原生 Vim diff 提供的功能。也许你想安装一些额外的插件，比如 git-conflict.nvim 或 diffview.nvim 来优化你的使用体验（其他值得关注的插件包括 Neogit 和 mini.git）。
+
+或者，你根本不想在编辑器中操作这些内容，而是更倾向于切换到终端模式，使用原生 git 或像 graphite 这样的封装工具。无论哪种方式适合你，LazyVim 都提供了你需要的集成功能。
+
+在下一章中，我们将承认现在已经不是 2020 年了，来谈谈人工智能吧。
+
+# [第16章：配置 AI](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-16/#_configuring_artificial_intelligence)
+
+> （ethan）本人目前用不到，暂不翻译，感兴趣的可以自行阅读原文。
+
+# [第17章：Debugging](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-17/#_debugging)
+
+> （ethan）本人目前用不到，暂不翻译，感兴趣的可以自行阅读原文。
+>
+
+# [第18章：Testing](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-18/#_testing)
+
+> （ethan）本人目前用不到，暂不翻译，感兴趣的可以自行阅读原文。
+>
 
 
 
