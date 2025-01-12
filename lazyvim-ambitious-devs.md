@@ -4610,6 +4610,7 @@ Init 函数的特点：
 
 1. 需要在插件加载前设置关键变量。
 2. 需要复杂的懒加载逻辑。
+3. 配置纯 VimScript 插件。对于那些没有提供 Lua setup() 方法的传统 VimScript 插件，需要通过 init 设置 VimScript 全局变量（vim.g.\*）来进行配置（比如 [vim-highlighter](https://github.com/azabiong/vim-highlighter)）。
 
 ### [19.4.3. Config](https://lazyvim-ambitious-devs.phillips.codes/course/chapter-19/#_config)
 
