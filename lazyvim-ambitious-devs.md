@@ -4966,6 +4966,24 @@ opts = function(_, opts)
     opts.features
   )
 end
+
+-- 这里不需要 return opts，因为这里直接修改了传入的 opts 表的内容。opts 是引用类型，对它的修改会直接反映在原表上，类似 C 语言中修改指针指向的内容。
+```
+
+```lua
+-- 替换嵌套表
+  opts = function(_, opts)
+    opts = opts or {}
+
+    -- 注意tbl_deep_extend函数，和第一个参数
+    opts.grep = vim.tbl_deep_extend("force", opts.grep or {}, {
+      RIPGREP_CONFIG_PATH = vim.env.RIPGREP_CONFIG_PATH,
+    })
+
+    return opts
+  end,
+
+-- 这里需要 return opts，因为这里创建了新的引用或新表。如果不返回，外部无法获取到新创建的内容，类似 C 语言中创建新的内存区域。
 ```
 
 使用函数式（opts）配置的主要优势是：

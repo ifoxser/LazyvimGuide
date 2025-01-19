@@ -75,3 +75,4 @@ Todo list：
 - multi cursor 插件
 - hight-light 取消全部、取消光标中选中的、快捷键。。。
 - gitsigns（vir txt；ghx->hx）
+- smart-split（循环还是不循环）
